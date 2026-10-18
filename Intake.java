@@ -5,89 +5,77 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 /*
  * ============================================================================
- *  Intake  --  owned by Student B
+ *  Intake  --  the mechanism that pulls game pieces in (and spits them out)
  * ============================================================================
  *
- *  The intake is one motor that pulls game elements into the robot. It can be
- *  running FORWARD, turned OFF, or running in REVERSE (to clear a jam).
+ *  The intake is a single motor. At any moment it is doing exactly ONE of
+ *  three things: running FORWARD to collect, sitting OFF, or running in
+ *  REVERSE to spit a stuck piece back out. Three neat choices like that are a
+ *  perfect fit for a STATE MACHINE:
  *
- *  This class is written as a small STATE MACHINE:
- *    - an `enum` lists the three situations the intake can be in
- *    - button presses change which situation we are in (the "state")
- *    - update() looks at the state each loop and sets the motor power to match
+ *      * a `State` names each situation the intake can be in
+ *      * a field remembers WHICH state we are in right now
+ *      * command methods (forward / reverse / off) only CHANGE that state
+ *      * update() runs every loop and makes the motor MATCH the state
  *
- *  The intake has no sensors and no timing, so its state machine is simple.
- *  We still write it this way so it matches the shape of every other
- *  subsystem -- once you understand one, you understand them all.
+ *  This is the same shape every subsystem in this course follows. Learn it on
+ *  the intake and you will recognize it on the shooter, the arm -- everything.
  * ============================================================================
  */
 public class Intake implements Subsystem {
 
-    /*
-     * WHAT IS AN ENUM?
-     * An enum ("enumeration") is a fixed, named set of values. Here it lists
-     * the only three situations the intake can be in. Using an enum instead
-     * of numbers like 0, 1, 2 means:
-     *    - the names read like English (State.FORWARD, not 0)
-     *    - the compiler stops us from using an invalid state by accident
-     */
+    // ===============================================
+    // Intake : States
+    // Do not remove this comment
+    // Add your State enum below
+    // ===============================================
     public enum State {
-        FORWARD,   // pulling game elements in
+        FORWARD,   // pulling game pieces in
         OFF,       // stopped
-        REVERSE    // spitting back out to clear a jam
+        REVERSE    // pushing back out to clear a jam
     }
 
-    // ── TUNING CONSTANTS ("defines") ─────────────────────────────────────
-    // These `static final` values are our version of a "#define". Java has no
-    // #define, so we use `static final` (a name that never changes) instead.
-    // Putting the numbers up here -- with names -- means:
-    //    - you tune the robot by editing ONE labeled line, not hunting through code
-    //    - the same value cannot drift out of sync in two places
-    //    - the number's MEANING is obvious from its name
-    // `static` = one shared copy for the whole class. `final` = cannot change.
+    // TUNING CONSTANTS. `static final` is Java's version of a labeled #define:
+    // one shared value that never changes. Tune the intake by editing THESE
+    // named lines, not by hunting for a bare number buried deep in the code.
     private static final double INTAKE_FORWARD_POWER =  1.0;   // full speed pulling in
     private static final double INTAKE_REVERSE_POWER = -0.5;   // gentler push-out to un-jam
 
-    // ── Hardware and state ───────────────────────────────────────────────
-    private final DcMotor motor;         // the physical intake motor
-    private State state = State.OFF;     // current situation; starts stopped
+    // The physical motor. `private` so ONLY the Intake can touch it -- the rest
+    // of the robot must go through the command methods below.
+    private final DcMotor motor;
+
+    // ===============================================
+    // Intake : Current State
+    // Do not remove this comment
+    // Add the field that remembers the current state below
+    // ===============================================
+    private State state = State.OFF;   // start stopped
 
     /*
-     * CONSTRUCTOR
-     * Runs once when Robot builds this subsystem. It looks up the intake motor
-     * from the hardware map by its configured name and leaves it stopped.
-     * The name "intake_motor" MUST match the Driver Hub configuration.
+     * CONSTRUCTOR -- runs once when Robot builds the intake. It finds the motor
+     * in the hardware map by the name shown in the Driver Hub configuration and
+     * leaves it stopped. (A later lesson moves this name into a shared config.)
      */
     public Intake(HardwareMap hardwareMap) {
-        motor = hardwareMap.dcMotor.get(RobotConfig.INTAKE_MOTOR);
+        motor = hardwareMap.get(DcMotor.class, "intake_motor");
+        // This motor is wired/geared so plain positive power spins it the wrong
+        // way, so REVERSE it once here -- now FORWARD (positive power) pulls in.
+        motor.setDirection(DcMotor.Direction.REVERSE);
         motor.setPower(0.0);
     }
 
-    // ── COMMAND METHODS ──────────────────────────────────────────────────
-    // These are the intake's whole public vocabulary: three DISCRETE, plain
-    // commands. "Discrete" means each one names an exact end state (forward,
-    // off, reverse) -- none of them is a "toggle." "Idempotent" means calling
-    // the same one twice does no harm: forward() then forward() just stays
-    // forward. They only change the STATE; update() does the motor work.
-    //
-    // WHY DISCRETE INSTEAD OF A toggle() METHOD?
-    // Because THE INPUT LAYER DECIDES THE GESTURE. The subsystem should only
-    // know "how to be forward / off / reverse," not "what a button press
-    // means." Whether tapping button A should toggle, or hold-to-run, or do
-    // something different in autonomous, is a decision for the OpMode that
-    // reads the controller -- not for the intake. Keeping the gesture out of
-    // here means:
-    //    - Autonomous can command an EXACT state (intake.forward()) without
-    //      guessing "what will a toggle do from whatever state we're in?"
-    //    - TeleOp can build ANY feel it wants (see MecanumDrive, where A
-    //      toggles off/forward) on top of these same simple commands.
-
-    /** Run the intake inward (collecting game elements). */
+    // ===============================================
+    // Intake : Commands
+    // Do not remove this comment
+    // Add your forward(), reverse(), off(), and getState() methods below
+    // ===============================================
+    /** Run the intake inward (collecting). Only changes the state. */
     public void forward() {
         state = State.FORWARD;
     }
 
-    /** Run the intake outward (spitting back out to clear a jam). */
+    /** Run the intake outward (spitting a stuck piece back out). */
     public void reverse() {
         state = State.REVERSE;
     }
@@ -97,14 +85,23 @@ public class Intake implements Subsystem {
         state = State.OFF;
     }
 
+    /** Lets the OpMode read the state -- to show it, or to decide a toggle. */
+    public State getState() {
+        return state;
+    }
+
     /*
-     * update()  --  APPLY THE STATE
-     * Called every loop by the scheduler. It reads the current state and sets
-     * the motor power to match. Because this runs every loop, the motor always
-     * reflects the latest state, and there is never a blocking wait.
+     * update()  --  APPLY THE STATE. The scheduler calls this once every loop.
+     * It looks at the current state and sets the motor power to match. Nothing
+     * in here waits, so every other subsystem keeps running smoothly too.
      */
     @Override
     public void update() {
+        // ===============================================
+        // Intake : Apply State
+        // Do not remove this comment
+        // Add the switch that turns the state into motor power below
+        // ===============================================
         switch (state) {
             case FORWARD:
                 motor.setPower(INTAKE_FORWARD_POWER);
@@ -116,10 +113,5 @@ public class Intake implements Subsystem {
                 motor.setPower(0.0);
                 break;
         }
-    }
-
-    /** Lets the OpMode show the intake state on the Driver Hub. */
-    public State getState() {
-        return state;
     }
 }
