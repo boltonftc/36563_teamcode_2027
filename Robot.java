@@ -43,7 +43,7 @@ public class Robot {
     // A later lesson builds the Indexer subsystem here
     // ===============================================
    // public final Indexer indexer;
-
+    public final Feeder feeder;
     // ===============================================
     // Flywheel : Field
     // Do not remove this comment
@@ -92,8 +92,8 @@ public class Robot {
         // Do not remove this comment
         // Add your Indexer construction below
         // ===============================================
-   //     indexer = new Indexer(hardwareMap);
-     //   subsystems.add(indexer);
+        feeder = new Feeder(hardwareMap);
+        subsystems.add(feeder);
 
         // ===============================================
         // Flywheel : Setup

@@ -137,9 +137,9 @@ public class MecanumDrive extends LinearOpMode {
             // Add your indexer button code below
             // ===============================================
             // Hold X to feed pieces out. No edge detection needed -- feeding is simply ON while held.
-         //   if (gamepad1.x) robot.indexer.feed();
-         //   else robot.indexer.stop();
-
+              if (gamepad1.x) robot.feeder.feed();
+              else robot.feeder.stop();
+            
             // ===============================================
             // Flywheel : Loop
             // Do not remove this comment
