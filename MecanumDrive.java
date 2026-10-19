@@ -2,165 +2,220 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.hardware.IMU;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 /*
  * ============================================================================
- *  MecanumDrive  --  the driver-controlled OpMode (TeleOp)
+ *  MecanumDrive  --  your TeleOp (the program a driver runs)
  * ============================================================================
  *
- *  This is the program a driver runs during the match. Notice how SHORT it is:
- *  all the real work lives inside the subsystems (Drivebase, Intake, Dumper,
- *  Localization). This OpMode's only jobs are:
+ *  Every FTC program is called an "OpMode". This one is a LinearOpMode: it
+ *  runs top-to-bottom like a story. Notice the THREE parts you will see in
+ *  every OpMode you ever write:
  *
- *     1. build the Robot
- *     2. every loop: run the scheduler, drive, and read the buttons
+ *     1. INIT  -- setup that runs ONCE, right after you press the INIT button.
+ *     2. START -- the single moment the driver presses the play button.
+ *                 waitForStart() pauses the program there until they do.
+ *     3. LOOP  -- code that repeats about 50 times every second, from START
+ *                 until the match ends.
  *
- *  This is the payoff of the subsystem design -- the OpMode reads almost like
- *  a plain-English description of the controls.
- *
- *  CONTROLS (gamepad1):
- *     Left stick .......... drive and strafe
- *     Triggers ............ turn (right = clockwise, left = counter-clockwise)
- *     A ................... toggle intake FORWARD / off
- *     B ................... toggle intake REVERSE / off
- *     Y ................... run one full dump cycle
- *     Right bumper ........ reset heading (re-zero field-centric "forward")
+ *  Right now this program does almost nothing. You will grow it, one lesson at
+ *  a time, until it drives a full robot.
  * ============================================================================
  */
-@TeleOp(name = "MecanumDrive (OOP)", group = "Dumper OOP")
+@TeleOp(name = "MecanumDrive", group = "BIOBUZZ")
 public class MecanumDrive extends LinearOpMode {
 
-    /*
-     * EDGE DETECTION
-     * A button is "pressed" for many loops in a row (a human holds it for a
-     * fraction of a second, which is dozens of loops). If we acted every loop
-     * the button is down, the intake would flip on/off dozens of times per
-     * press.
-     *
-     * The fix: remember whether the button was down LAST loop. We only act on
-     * the moment it goes from up -> down (a "rising edge" -- a fresh press).
-     * These variables hold last loop's state for each button we care about.
-     *
-     * THIS IS "THE INPUT LAYER." Notice that the toggle behavior lives HERE,
-     * in the OpMode, not inside the Intake subsystem. The subsystem only knows
-     * how to be forward/off/reverse; the decision that "tapping A should
-     * toggle off<->forward" is an input-layer choice. That separation is why
-     * the same intake commands also work cleanly in autonomous.
-     */
+    // Edge-detection memory for the buttons (added in the subsystem lessons).
+    // ===============================================
+    // Intake : Variables
+    // Do not remove this comment
+    // Add your intake button-edge variables below
+    // ===============================================
     private boolean previousA = false;
     private boolean previousB = false;
+
+    // ===============================================
+    // Flywheel : Variables
+    // Do not remove this comment
+    // Add your flywheel button-edge variable below
+    // ===============================================
     private boolean previousY = false;
-    private boolean previousRightBumper = false;
 
     @Override
     public void runOpMode() {
-        /*
-         * Build the whole robot. This runs every constructor -- finding motors,
-         * configuring the Pinpoint, etc. -- so it must happen during INIT,
-         * before the match starts. HOLD THE ROBOT STILL: the Pinpoint
-         * calibrates its gyro in here.
-         */
+
+        // ===============================================
+        // Drive : Setup
+        // Do not remove this comment
+        // Your four drive motors are created here, in INIT.
+        // ===============================================
+        // Build the whole robot. Every subsystem's constructor runs here (finding its motors and
+        // servos), so it must happen during INIT, before the match starts.
         Robot robot = new Robot(hardwareMap);
 
-        // FTC Dashboard handle (used in the telemetry section below). Safe in
-        // the sim, where it is a no-op; live on a real Control Hub.
-        FtcDashboard dashboard = FtcDashboard.getInstance();
+        // ===============================================
+        // IMU : Setup
+        // Do not remove this comment
+        // Get the IMU from the hardware map and initialize it below
+        // ===============================================
+        IMU imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(
+            new RevHubOrientationOnRobot(
+                RevHubOrientationOnRobot.LogoFacingDirection.LEFT,
+                RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD)));
 
-        telemetry.addLine("Initialized. Hold the robot still, then press START.");
+        // ─── INIT ──────────────────────────────────────────────────────
+        // Everything here runs ONCE, after you press INIT. Show a message so the driver knows
+        // the robot is ready.
+        telemetry.addLine("Initialized. Press START.");
         telemetry.update();
 
-        // waitForStart() pauses here until the driver presses the START button.
-        // This is allowed to block because the match has not begun yet.
+        // START: pause here until the driver presses the play button.
         waitForStart();
 
-        // ── THE MAIN LOOP ───────────────────────────────────────────────
-        // Runs over and over (~50 times per second) until the match ends or
-        // the driver presses STOP. Everything inside must be non-blocking so
-        // the loop stays fast and the controls stay responsive.
+        // ===============================================
+        // Telemetry : Loop Counter
+        // Do not remove this comment
+        // Type your loop-counter variable below
+        // ===============================================
+        int loops = 0;
+
+        // ─── THE RUN LOOP ──────────────────────────────────────────────
+        // Repeats about 50 times a second until the match ends. Everything a driver does happens
+        // in here, over and over.
         while (opModeIsActive()) {
 
-            // 1) RUN THE SCHEDULER. This calls update() on every subsystem:
-            //    localization reads fresh sensor data, and the intake and
-            //    dumper advance their state machines by one small slice.
+            // ===============================================
+            // IMU : Heading
+            // Do not remove this comment
+            // Read the heading, show it, and reset it on the right bumper
+            // ===============================================
+            double heading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            telemetry.addData("Heading (deg)", Math.toDegrees(heading));
+            telemetry.addData("Heading (rad)", heading);
+            if (gamepad1.right_bumper) {
+                imu.resetYaw();
+            }
+
+            // ===============================================
+            // Drive : Loop
+            // Do not remove this comment
+            // Your drive code runs here, every time through the loop.
+            // ===============================================
+            // 1) SCHEDULER: give every mechanism a turn to advance its own work.
             robot.update();
 
-            // 2) DRIVE. Read the latest heading from localization and hand the
-            //    gamepad to the drivebase, which applies the wheel powers now.
-            double headingRadians = robot.localization.getHeadingRadians();
-            robot.drive.driveFieldCentric(gamepad1, headingRadians);
+            // 2) DRIVE: hand the gamepad and the IMU heading to the drivebase.
+            robot.drive.driveFieldCentric(gamepad1, heading);
 
-            // 3) READ THE BUTTONS (with edge detection). Each `pressed` is true
-            //    only on the single loop where the button first goes down.
+            // 3) READ THE BUTTONS (with edge detection).
+            // ===============================================
+            // Intake : Loop
+            // Do not remove this comment
+            // Add your intake button code below
+            // ===============================================
             boolean pressedA = gamepad1.a && !previousA;
             boolean pressedB = gamepad1.b && !previousB;
-            boolean pressedY = gamepad1.y && !previousY;
-            boolean pressedRightBumper = gamepad1.right_bumper && !previousRightBumper;
-
             if (pressedA) {
-                // TOGGLE GESTURE, built in the input layer: if the intake is
-                // already running forward, turn it off; otherwise run forward.
-                // We read the subsystem's state and pick the matching DISCRETE
-                // command. The Intake never has to know a "toggle" exists.
-                if (robot.intake.getState() == Intake.State.FORWARD) {
-                    robot.intake.off();
-                } else {
-                    robot.intake.forward();
-                }
+                if (robot.intake.getState() != Intake.State.OFF) robot.intake.off();
+                else robot.intake.forward();
             }
             if (pressedB) {
-                // Same toggle idea for reverse: off <-> reverse.
-                if (robot.intake.getState() == Intake.State.REVERSE) {
-                    robot.intake.off();
-                } else {
-                    robot.intake.reverse();
-                }
+                if (robot.intake.getState() != Intake.State.OFF) robot.intake.off();
+                else robot.intake.reverse();
             }
-            if (pressedY) {
-                // This only STARTS the dump. The Dumper's state machine (run by
-                // robot.update() above) carries out the raise/hold/lower over
-                // the next many loops, all while the driver keeps driving.
-                robot.dumper.dump();
-            }
-            if (pressedRightBumper) {
-                robot.localization.reset();
-            }
-
-            // Remember this loop's button values for next loop's edge detection.
             previousA = gamepad1.a;
             previousB = gamepad1.b;
-            previousY = gamepad1.y;
-            previousRightBumper = gamepad1.right_bumper;
 
-            // 4) TELEMETRY. Show the driver what every subsystem is doing.
-            double headingDeg = robot.localization.getHeadingDegrees();
-            double xIn = robot.localization.getXInches();
-            double yIn = robot.localization.getYInches();
+            // ===============================================
+            // Indexer : Loop
+            // Do not remove this comment
+            // Add your indexer button code below
+            // ===============================================
+            // Hold X to feed pieces out. No edge detection needed -- feeding is simply ON while held.
+            if (gamepad1.x) robot.indexer.feed();
+            else robot.indexer.stop();
+
+            // ===============================================
+            // Flywheel : Loop
+            // Do not remove this comment
+            // Add your flywheel button code below
+            // ===============================================
+            // Y toggles the flywheel. The controller holds the target; the right stick now trims the TARGET.
+            if (gamepad1.y && !previousY) robot.flywheel.toggle();
+            previousY = gamepad1.y;
+            robot.flywheel.trim(-gamepad1.right_stick_y);
+
+            // ===============================================
+            // Hood : Loop
+            // Do not remove this comment
+            // Add your hood aim code below
+            // ===============================================
+            // Right stick LEFT/RIGHT aims the hood (up/down trims the flywheel target).
+            robot.hood.aim(gamepad1.right_stick_x);
+
+            // ===============================================
+            // Gamepad : Read
+            // Do not remove this comment
+            // Read both sticks and the face buttons, then show them live
+            // ===============================================
+            double leftStickX = gamepad1.left_stick_x;
+            double leftStickY = gamepad1.left_stick_y;
+            double rightStickX = gamepad1.right_stick_x;
+            double rightStickY = gamepad1.right_stick_y;
+            boolean aHeld = gamepad1.a;
+            boolean bHeld = gamepad1.b;
+            boolean xHeld = gamepad1.x;
+            boolean yHeld = gamepad1.y;
+            telemetry.addData("Left Stick X", leftStickX);
+            telemetry.addData("Left Stick Y", leftStickY);
+            telemetry.addData("Right Stick X", rightStickX);
+            telemetry.addData("Right Stick Y", rightStickY);
+            telemetry.addData("A", aHeld);
+            telemetry.addData("B", bHeld);
+            telemetry.addData("X", xHeld);
+            telemetry.addData("Y", yHeld);
+
+            // ===============================================
+            // Telemetry : Status
+            // Do not remove this comment
+            // Type your telemetry lines below
+            // ===============================================
+            telemetry.addData("Status", "Hello, Robot!");
+            loops += 1;
+            telemetry.addData("Loops", loops);
 
             telemetry.addData("Intake", robot.intake.getState());
-            telemetry.addData("Dumper", robot.dumper.getState());
+            telemetry.addData("Indexer", robot.indexer.isFeeding() ? "FEEDING" : "idle");
+            // ===============================================
+            // Flywheel : Telemetry
+            // Do not remove this comment
+            // Show the flywheel status and measured RPM below
+            // ===============================================
+            telemetry.addData("Flywheel", robot.flywheel.isSpinning()
+                ? String.format("ON  %.0f%% power", robot.flywheel.getPower() * 100)
+                : "off");
+            telemetry.addData("Flywheel RPM", "%.0f", robot.flywheel.getRpm());
+            telemetry.addData("Target RPM", "%.0f", robot.flywheel.getTarget());
+            telemetry.addData("RPM error", "%.0f", robot.flywheel.getTarget() - robot.flywheel.getRpm());
+            telemetry.addData("Hood", "%.2f", robot.hood.getPosition());
+            // ===============================================
+            // Localization : Telemetry
+            // Do not remove this comment
+            // Show where the robot thinks it is below
+            // ===============================================
             telemetry.addData("Has Pinpoint", robot.localization.hasPinpoint());
-            telemetry.addData("Heading (deg)", "%.1f", headingDeg);
-            telemetry.addData("Position (in)", "x %.1f  y %.1f", xIn, yIn);
-            telemetry.update();
+            telemetry.addData("Heading (deg)", "%.1f", robot.localization.getHeadingDegrees());
+            telemetry.addData("Position (in)", "x %.1f  y %.1f",
+                robot.localization.getXInches(), robot.localization.getYInches());
+            telemetry.addData("Distance from start (in)", "%.1f",
+                robot.localization.getDistanceFromStartInches());
 
-            // 5) FTC DASHBOARD. Mirror the same values to the dashboard's live
-            //    graphs and draw the robot on its field view. This is a great
-            //    way to watch the Pinpoint position while bringing up a real
-            //    robot. It does NOTHING in the simulator (the dashboard is a
-            //    no-op stub there); on a real Control Hub, connect a laptop to
-            //    the robot's Wi-Fi and open http://192.168.43.1:8080/dash.
-            TelemetryPacket packet = new TelemetryPacket();
-            packet.put("Intake", robot.intake.getState().toString());
-            packet.put("Dumper", robot.dumper.getState().toString());
-            packet.put("Has Pinpoint", robot.localization.hasPinpoint());
-            packet.put("Heading (deg)", headingDeg);
-            packet.put("X (in)", xIn);
-            packet.put("Y (in)", yIn);
-            DashboardDraw.robot(packet.fieldOverlay(), xIn, yIn, robot.localization.getHeadingRadians());
-            dashboard.sendTelemetryPacket(packet);
+            telemetry.update();
         }
     }
 }

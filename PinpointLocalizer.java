@@ -11,26 +11,14 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose2D;
 
-/*
- * ============================================================================
- *  PinpointLocalizer  --  the autonomous "where am I?" for Pedro Pathing
- * ============================================================================
- *
- *  TeleOp reads position through the Localization subsystem. Autonomous is
- *  different: Pedro Pathing's Follower needs a Localizer object of its OWN to
- *  steer along a path. THIS class is that Localizer.
- *
- *  It is backed by the SAME physical goBILDA Pinpoint the Localization
- *  subsystem uses, configured from the SAME single source of truth
- *  (RobotConfig.configurePinpoint), so the two can never disagree about the
- *  one sensor they share. There is no camera and no sensor fusion here -- the
- *  Pinpoint's dead-wheel odometry alone drives the autonomous.
- *
- *  Works unchanged on the sim (a simulated Pinpoint reads ground truth) and on
- *  the real robot (the real I2C driver); only what hardwareMap.get() hands back
- *  differs.
- * ============================================================================
- */
+// Pedro Pathing Localizer backed by a goBILDA Pinpoint. Works unchanged on the sim (a
+// simulated Pinpoint reads ground truth) and on the real robot (the real I2C driver) --
+// only the class hardwareMap.get() hands back differs.
+//
+// REAL-ROBOT SETUP: measure your pods' offsets from the robot's center of rotation and set
+// them below (see GoBildaPinpointDriver.setOffsets() javadoc); confirm the pod type and
+// encoder directions match your build. The sim ignores these (pods are modeled at center),
+// but real hardware needs them or position will smear during turns.
 public class PinpointLocalizer implements Localizer {
 
     private final GoBildaPinpointDriver pinpoint;
@@ -39,8 +27,20 @@ public class PinpointLocalizer implements Localizer {
     private double totalHeading = 0.0, lastHeadingRad = 0.0;
 
     public PinpointLocalizer(HardwareMap hardwareMap) {
-        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, RobotConfig.PINPOINT);
-        RobotConfig.configurePinpoint(pinpoint);   // ROBOT MUST BE STATIONARY here
+        pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        pinpoint.setOffsets(0.0, 0.0, DistanceUnit.MM);
+        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
+        // Pedro expects +X forward, +Y left, CCW+ heading. Our strafe pod read backwards
+        // (moving LEFT made Y count DOWN), so the Y pod is REVERSED to put +Y on the left.
+        pinpoint.setEncoderDirections(
+                GoBildaPinpointDriver.EncoderDirection.FORWARD,    // X (forward) pod - FORWARD
+                GoBildaPinpointDriver.EncoderDirection.FORWARD);  // Y (strafe) pod - REVERSED
+        pinpoint.resetPosAndIMU();   // ROBOT MUST BE STATIONARY here
+        // The Pinpoint keeps calibrating for ~0.25s after resetPosAndIMU(); a setPosition() issued
+        // during that window (from setStartPose, moments later) is silently zeroed back to origin --
+        // which made the robot think it started at (0,0,0). Block until calibration finishes. This
+        // mirrors Pedro's own PinpointLocalizer.resetPinpoint(), which sleeps 300ms right here.
+        try { Thread.sleep(300); } catch (InterruptedException e) { Thread.currentThread().interrupt(); }
     }
 
     @Override
@@ -56,8 +56,11 @@ public class PinpointLocalizer implements Localizer {
         return v;
     }
 
-    // Tell the Pinpoint itself where the robot is (its own setPosition re-anchors) --
+    // Tell the Pinpoint itself where the robot is (its own setPosition/setStartPose re-anchor) --
     // this is exactly what a real Pinpoint-based localizer does; no extra offset math needed here.
+    // A SINGLE setPosition() is correct: the constructor already waited out IMU calibration, so the
+    // anchor sticks. (Retrying/hammering setPosition here actually restarts calibration and the pose
+    // never settles -- that was a real bug we hit.)
     @Override
     public void setStartPose(Pose pose) {
         pinpoint.setPosition(new Pose2D(DistanceUnit.INCH, pose.getX(), pose.getY(), AngleUnit.RADIANS, pose.getHeading()));
@@ -66,8 +69,8 @@ public class PinpointLocalizer implements Localizer {
         lastHeadingRad = pose.getHeading();
     }
 
-    // Re-anchor to an arbitrary pose mid-match -- identical to setStartPose();
-    // a real Pinpoint's setPosition() is the same call either way.
+    // Re-anchor to an arbitrary pose mid-match (e.g. an AprilTag correction) -- identical to
+    // setStartPose(); a real Pinpoint's setPosition() is the same call either way.
     @Override
     public void setPose(Pose pose) {
         setStartPose(pose);
@@ -111,6 +114,7 @@ public class PinpointLocalizer implements Localizer {
     @Override
     public void resetIMU() throws InterruptedException {
         pinpoint.recalibrateIMU();   // ROBOT MUST BE STATIONARY
+        Thread.sleep(300);           // let calibration finish before any later setPosition() re-anchor
     }
 
     @Override
