@@ -75,6 +75,7 @@ public class Flywheel implements Subsystem {
      */
     public Flywheel(HardwareMap hardwareMap) {
         shooter = hardwareMap.get(DcMotorEx.class, "shooter");
+            shooter.setDirection(DcMotorEx.Direction.REVERSE);
         shooter.setPower(0.0);
     }
 
