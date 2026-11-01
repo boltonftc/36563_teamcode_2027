@@ -2,7 +2,6 @@
   "name": "kyle",
   "package": "org.firstinspires.ftc.teamcode",
   "files": [
-    "DashboardDraw.java",
     "Drivebase.java",
     "Feeder.java",
     "Flywheel.java",
