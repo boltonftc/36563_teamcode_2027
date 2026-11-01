@@ -88,7 +88,10 @@ public class MecanumDrive extends LinearOpMode {
         // Repeats about 50 times a second until the match ends. Everything a driver does happens
         // in here, over and over.
         while (opModeIsActive()) {
-
+            // Turret: hold D-pad left/right to swing it (manual override until auto-aim)
+            if (gamepad1.dpad_left)  robot.turret.nudgeLeft();
+            if (gamepad1.dpad_right) robot.turret.nudgeRight();
+            telemetry.addData("Turret", "%.0f deg", robot.turret.getAngle());
             // ===============================================
             // IMU : Heading
             // Do not remove this comment

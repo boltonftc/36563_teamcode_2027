@@ -1,4 +1,12 @@
 {
-  "lessons": {},
-  "quiz": {}
+  "lessons": {
+    "17_turret": true
+  },
+  "quiz": {
+    "17_turret": {
+      "attempts": 1,
+      "best": 9,
+      "passed": true
+    }
+  }
 }

@@ -36,8 +36,9 @@ public class Robot {
     // A later lesson builds the Intake subsystem here
     // ===============================================
     public final Intake intake;
-
-    // ===============================================
+    //turret : Field
+    public final Turret turret;
+        // ===============================================
     // Indexer : Field
     // Do not remove this comment
     // A later lesson builds the Indexer subsystem here
@@ -86,6 +87,11 @@ public class Robot {
         // ===============================================
         intake = new Intake(hardwareMap);
         subsystems.add(intake);
+            // with the other subsystem fields:
+
+         // in the constructor, with the other subsystems:
+            turret = new Turret(hardwareMap);
+            subsystems.add(turret);
 
         // ===============================================
         // Indexer : Setup
