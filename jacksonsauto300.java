@@ -45,9 +45,9 @@ public class jacksonsauto300 extends LinearOpMode {
         // CAP:POSE seq=1 kind=init
         Pose pose1 = new Pose(64.58, 8.70, Math.toRadians(180.0));
         // CAP:POSE seq=2 kind=pose
-        Pose pose2 = new Pose(53.56, 7.79, Math.toRadians(-93.9));
+        Pose pose2 = new Pose(48.56, 9.68, Math.toRadians(172.7));
         // CAP:POSE seq=3 kind=pose
-        Pose pose3 = new Pose(53.27, -29.63, Math.toRadians(-178.8));
+        Pose pose3 = new Pose(49.59, -33.41, Math.toRadians(-178.8));
         // CAP:POSE seq=4 kind=pose
         Pose pose4 = new Pose(60.39, -30.83, Math.toRadians(180.0));
 

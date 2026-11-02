@@ -1,4 +1,12 @@
 {
-  "lessons": {},
-  "quiz": {}
+  "lessons": {
+    "16_auto_actions": true
+  },
+  "quiz": {
+    "16_auto_actions": {
+      "attempts": 1,
+      "best": 8,
+      "passed": true
+    }
+  }
 }

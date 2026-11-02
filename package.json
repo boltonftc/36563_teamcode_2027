@@ -10,12 +10,14 @@
     "Localization.java",
     "MecanumDrive.java",
     "MecanumDrivetrainSubsystem.java",
+    "MecanumKinematics.java",
     "PinpointLocalizer.java",
     "Robot.java",
-    "SimpleAuto.java",
+    "RobotConfig.java",
     "Subsystem.java",
     "jacksonsauto.java",
     "jacksonsauto300.java",
-    "jacksonsauto3000.java"
+    "jacksonsauto3000.java",
+    "jacksonsauto40000.java"
   ]
 }
