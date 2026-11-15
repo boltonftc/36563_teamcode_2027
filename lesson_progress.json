@@ -1,11 +1,47 @@
 {
   "lessons": {
-    "17_turret": true
+    "17_turret": true,
+    "18_auto_aim": true,
+    "00_welcome": true,
+    "01_robot_basics": true,
+    "02_code_package": true,
+    "03_hello_telemetry": true,
+    "04_reading_gamepad": true
   },
   "quiz": {
     "17_turret": {
       "attempts": 1,
       "best": 9,
+      "passed": true
+    },
+    "18_auto_aim": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "00_welcome": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "01_robot_basics": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "02_code_package": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "03_hello_telemetry": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "04_reading_gamepad": {
+      "attempts": 1,
+      "best": 10,
       "passed": true
     }
   }

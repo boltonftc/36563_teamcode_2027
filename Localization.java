@@ -75,7 +75,7 @@ public class Localization implements Subsystem {
             // FORWARD/REVERSED -- no rewiring and no moving the pod.
             pinpoint.setEncoderDirections(
                 GoBildaPinpointDriver.EncoderDirection.FORWARD,    // X (forward) pod
-                GoBildaPinpointDriver.EncoderDirection.REVERSED);  // Y (strafe) pod -> +Y = left
+                GoBildaPinpointDriver.EncoderDirection.FORWARD);  // Y (strafe) pod -> +Y = left
 
             // Zero everything: this spot becomes (0, 0) facing 0. It also
             // calibrates the gyro, so HOLD THE ROBOT STILL during INIT.
@@ -125,7 +125,37 @@ public class Localization implements Subsystem {
     public double getYInches() {
         return latestPose.getY(DistanceUnit.INCH);
     }
+        // HOME: a spot the drivers can find by feel. Back of the robot against the red drivers' wall,
+    // facing away from it, left side on the loading zone's right-hand tape line.
+    // These numbers come from the simulator -- MEASURE your field and your robot!
+    private static final double ROBOT_WIDTH  = 18.0;   // inches, side to side
+    private static final double ROBOT_LENGTH = 18.0;   // inches, front to back
+    private static final double TAPE_X = -22.0;        // the loading zone's right-hand tape line
+    private static final double WALL_Y = -71.0;        // the inside face of the drivers' wall
+    private static final double HOME_X = TAPE_X + ROBOT_WIDTH / 2;    // -13: the robot's CENTER, not its side
+    private static final double HOME_Y = WALL_Y + ROBOT_LENGTH / 2;   // -62
+    private static final double HOME_HEADING = 90.0;                  // facing away from the drivers
 
+    private boolean poseKnown = false;   // stays false until auto hands us a pose, or the driver resets at HOME
+
+    /** Tell the Pinpoint where the robot is right now: field inches, heading in degrees. */
+    public void setPose(double xInches, double yInches, double headingDegrees) {
+        latestPose = new Pose2D(DistanceUnit.INCH, xInches, yInches, AngleUnit.DEGREES, headingDegrees);
+        if (pinpoint != null) {
+            pinpoint.setPosition(latestPose);
+        }
+        poseKnown = true;
+    }
+
+    /** The robot is parked at HOME: that's exactly where we are. */
+    public void setPoseToHome() {
+        setPose(HOME_X, HOME_Y, HOME_HEADING);
+    }
+
+    /** True once we know where we are on the field (from auto, or a HOME reset). */
+    public boolean isPoseKnown() {
+        return poseKnown;
+    }
     /*
      * Straight-line distance from the start point. This is the Pythagorean
      * theorem: for a right triangle with legs x and y, the hypotenuse is

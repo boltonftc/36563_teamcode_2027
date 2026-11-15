@@ -6,6 +6,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 /*
  * ============================================================================
@@ -76,7 +77,16 @@ public class MecanumDrive extends LinearOpMode {
 
         // START: pause here until the driver presses the play button.
         waitForStart();
-
+        // Where are we? If auto just ran, it left the robot's position on the blackboard.
+        // remove() uses it up, so a later TeleOp run can't pick up an old, stale position.
+        Object fromAuto = blackboard.remove("autoPose");
+        if (fromAuto instanceof double[]) {
+            double[] p = (double[]) fromAuto;
+            robot.localization.setPose(p[0], p[1], p[2]);
+        }
+        AutoAim aim = new AutoAim();
+        ElapsedTime rbHeld = new ElapsedTime();   // a stopwatch for "hold RB for half a second"
+        boolean homeDone = false;
         // ===============================================
         // Telemetry : Loop Counter
         // Do not remove this comment
@@ -133,7 +143,23 @@ public class MecanumDrive extends LinearOpMode {
             }
             previousA = gamepad1.a;
             previousB = gamepad1.b;
+            // HOME reset: park at HOME and hold RB for half a second. Resets field-centric "forward"
+            // (the IMU) AND tells odometry exactly where the robot is. Only press it at HOME!
+            if (!gamepad1.right_bumper) {
+                rbHeld.reset();          // the stopwatch restarts whenever RB is up
+                homeDone = false;
+            } else if (rbHeld.seconds() >= 0.5 && !homeDone) {
+                imu.resetYaw();
+                robot.localization.setPoseToHome();
+                homeDone = true;
+            }
+            if (homeDone) telemetry.addLine("HOME: position reset. Let go of RB.");
 
+            // Auto-aim: the turret follows the cell on our side of the field; right stick left/right trims.
+            aim.trim(gamepad1.right_stick_x);
+            aim.aim(robot.localization, robot.turret);
+            telemetry.addData("Aim", aim.getStatus());
+            telemetry.addData("Aim trim", "%.1f deg", aim.getTrim());
             // ===============================================
             // Indexer : Loop
             // Do not remove this comment
