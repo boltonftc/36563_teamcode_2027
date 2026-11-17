@@ -6,7 +6,9 @@
     "01_robot_basics": true,
     "02_code_package": true,
     "03_hello_telemetry": true,
-    "04_reading_gamepad": true
+    "04_reading_gamepad": true,
+    "16_auto_actions": true,
+    "05_tank_drive": true
   },
   "quiz": {
     "17_turret": {
@@ -40,6 +42,16 @@
       "passed": true
     },
     "04_reading_gamepad": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "16_auto_actions": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "05_tank_drive": {
       "attempts": 1,
       "best": 10,
       "passed": true

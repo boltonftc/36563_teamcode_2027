@@ -61,7 +61,7 @@ public class Localization implements Subsystem {
         if (pinpoint != null) {
             // Describe the physical odometry pods to the Pinpoint. You would only
             // change these if you moved the tracking wheels on the real robot.
-            pinpoint.setOffsets(0.0, 0.0, DistanceUnit.MM);
+            pinpoint.setOffsets(-3.0, 7.0, DistanceUnit.INCH);
             pinpoint.setEncoderResolution(
                 GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
 
@@ -128,7 +128,7 @@ public class Localization implements Subsystem {
         // HOME: a spot the drivers can find by feel. Back of the robot against the red drivers' wall,
     // facing away from it, left side on the loading zone's right-hand tape line.
     // These numbers come from the simulator -- MEASURE your field and your robot!
-    private static final double ROBOT_WIDTH  = 18.0;   // inches, side to side
+    private static final double ROBOT_WIDTH  = 9.0;   // inches, side to side
     private static final double ROBOT_LENGTH = 18.0;   // inches, front to back
     private static final double TAPE_X = -22.0;        // the loading zone's right-hand tape line
     private static final double WALL_Y = -71.0;        // the inside face of the drivers' wall

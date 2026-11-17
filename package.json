@@ -2,6 +2,7 @@
   "name": "kyle",
   "package": "org.firstinspires.ftc.teamcode",
   "files": [
+    "AutoAim.java",
     "Drivebase.java",
     "Feeder.java",
     "Flywheel.java",
@@ -14,9 +15,9 @@
     "Robot.java",
     "RobotConfig.java",
     "Subsystem.java",
-    "parellelgurtautoV2.java",
     "Turret.java",
-    "AutoAim.java",
-    "shoot_park.java"
+    "parellelgurtautoV2.java",
+    "shoot_park.java",
+    "shootauto1.java"
   ]
 }

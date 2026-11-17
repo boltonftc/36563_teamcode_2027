@@ -42,7 +42,7 @@ public class Flywheel implements Subsystem {
     // Do not remove this comment
     // Add the target RPM and the feedforward + P gains below
     // ===============================================
-    private static final double TARGET_RPM = 3180.0;   // the STARTING target speed the controller holds
+    private static final double TARGET_RPM = 3150.0;   // the STARTING target speed the controller holds
     private static final double kV = 0.000177;         // WAS .000167 feedforward: power per RPM (about 1 / 6000 free speed)
     private static final double kP = 0.00020;          // WAS .00020 correction: how hard to fix an RPM error
     private static final double TRIM_STEP  = 8.0;      // RPM the right stick trims the target per loop
