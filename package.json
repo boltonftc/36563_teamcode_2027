@@ -2,7 +2,9 @@
   "name": "Gabeofficialcode",
   "package": "org.firstinspires.ftc.teamcode",
   "files": [
+    "DashboardDraw.java",
     "Drivebase.java",
+    "Dumper.java",
     "Flywheel.java",
     "Hood.java",
     "Indexer.java",
@@ -14,10 +16,12 @@
     "PinpointLocalizer.java",
     "Robot.java",
     "RobotConfig.java",
+    "SimpleAuto.java",
     "Subsystem.java",
     "jacksonsauto.java",
     "jacksonsauto300.java",
     "jacksonsauto3000.java",
-    "jacksonsauto40000.java"
+    "jacksonsauto40000.java",
+    "jacksonsauto41000.java"
   ]
 }

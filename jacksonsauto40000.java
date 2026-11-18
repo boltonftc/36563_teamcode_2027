@@ -88,7 +88,7 @@ public class jacksonsauto40000 extends LinearOpMode {
         // To shoot here, see the lesson "Actions in Autonomous: Make It Shoot".
         
         // CAP:ACTION-END seq=3
-                robot.flywheel.toggle();                                  // flywheel ON (default target RPM)
+        robot.flywheel.toggle();                                  // flywheel ON (default target RPM)
         for (int i = 0; i < 150 && opModeIsActive(); i++) {       // ~3 s: let it spin up
             follower.update();                                    // hold our spot
             robot.update();                                       // make the flywheel actually spin
