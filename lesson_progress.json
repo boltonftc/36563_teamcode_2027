@@ -8,7 +8,8 @@
     "03_hello_telemetry": true,
     "04_reading_gamepad": true,
     "16_auto_actions": true,
-    "05_tank_drive": true
+    "05_tank_drive": true,
+    "19_extractor": true
   },
   "quiz": {
     "17_turret": {
@@ -52,6 +53,11 @@
       "passed": true
     },
     "05_tank_drive": {
+      "attempts": 1,
+      "best": 10,
+      "passed": true
+    },
+    "19_extractor": {
       "attempts": 1,
       "best": 10,
       "passed": true

@@ -168,6 +168,11 @@ public class MecanumDrive extends LinearOpMode {
             // Hold X to feed pieces out. No edge detection needed -- feeding is simply ON while held.
               if (gamepad1.x) robot.feeder.feed();
               else robot.feeder.stop();
+
+            // Extractor arm: D-pad down lowers it, D-pad up raises it. The driver decides when.
+            if (gamepad1.dpad_down) robot.extractor.deploy();
+            if (gamepad1.dpad_up)   robot.extractor.stow();
+            telemetry.addData("Extractor", robot.extractor.getState());
             
             // ===============================================
             // Flywheel : Loop

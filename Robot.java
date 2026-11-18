@@ -30,6 +30,7 @@ public class Robot {
     // `final` means once built in the constructor, the reference never changes.
     public final Drivebase drive;
 
+
     // ===============================================
     // Intake : Field
     // Do not remove this comment
@@ -52,6 +53,10 @@ public class Robot {
     // ===============================================
     public final Flywheel flywheel;
 
+    // with the other subsystem fields:
+    public final Extractor extractor;
+
+    
     // ===============================================
     // Hood : Field
     // Do not remove this comment
@@ -88,11 +93,15 @@ public class Robot {
         intake = new Intake(hardwareMap);
         subsystems.add(intake);
             // with the other subsystem fields:
-
          // in the constructor, with the other subsystems:
             turret = new Turret(hardwareMap);
             subsystems.add(turret);
 
+
+    // in the constructor, with the other subsystems:
+    extractor = new Extractor(hardwareMap);
+    subsystems.add(extractor);
+        
         // ===============================================
         // Indexer : Setup
         // Do not remove this comment
