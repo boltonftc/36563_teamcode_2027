@@ -63,8 +63,8 @@ public final class RobotConfig {
     // Pod offsets from the robot's CENTER OF ROTATION, in millimeters (only
     // the perpendicular offset per pod matters). REAL ROBOT: measure these.
     // SIMULATOR: the pods sit at the center, so both are 0.
-    public static final double POD_X_OFFSET_MM = 76.2;   // forward pod: left of center +, right -  (-3.00 in)
-    public static final double POD_Y_OFFSET_MM = -177.8;   // strafe pod: forward of center +, back -  (7.00 in)
+    public static final double POD_X_OFFSET_MM = -76.2;   // forward pod: left of center +, right -  (-3.00 in)
+    public static final double POD_Y_OFFSET_MM = -177.8;   // strafe pod: forward of center +, back -  (-7.00 in)
 
     // Which goBILDA pods you have:
     //   4-Bar Odometry Pack   -> goBILDA_4_BAR_POD

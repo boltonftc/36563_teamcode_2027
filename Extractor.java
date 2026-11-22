@@ -19,7 +19,7 @@ public class Extractor implements Subsystem {
 
     // Servo numbers (0.0 .. 1.0) for each state. FIND YOURS with Extractor Calibrate!
     private static final double STOWED_POS   = 0;
-    private static final double DEPLOYED_POS = 60;
+    private static final double DEPLOYED_POS = 0.6;
 
     private final Servo servo;                 // null if this robot has no "extractor" configured
     private State state = State.STOWED;        // where we WANT the arm to be
