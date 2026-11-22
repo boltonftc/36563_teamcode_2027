@@ -61,25 +61,7 @@ public class Localization implements Subsystem {
         if (pinpoint != null) {
             // Describe the physical odometry pods to the Pinpoint. You would only
             // change these if you moved the tracking wheels on the real robot.
-            pinpoint.setOffsets(-3.0, 7.0, DistanceUnit.INCH);
-            pinpoint.setEncoderResolution(
-                GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-
-            // Which way each pod COUNTS. The frame we (and Pedro Pathing) want is:
-            //   push the robot FORWARD -> X counts UP
-            //   push the robot LEFT    -> Y counts UP   (so moving RIGHT makes Y go DOWN)
-            //   spin COUNTER-clockwise -> heading counts UP
-            // On OUR robot the strafe pod was mounted so that moving LEFT made Y count the
-            // WRONG way, so the Y pod is REVERSED here to put +Y back on the left. If an
-            // axis ever reads backwards on your robot, flip only that pod's
-            // FORWARD/REVERSED -- no rewiring and no moving the pod.
-            pinpoint.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.FORWARD,    // X (forward) pod
-                GoBildaPinpointDriver.EncoderDirection.FORWARD);  // Y (strafe) pod -> +Y = left
-
-            // Zero everything: this spot becomes (0, 0) facing 0. It also
-            // calibrates the gyro, so HOLD THE ROBOT STILL during INIT.
-            pinpoint.resetPosAndIMU();
+            RobotConfig.configurePinpoint(pinpoint);   // pod offsets, pod type, directions + reset (HOLD STILL) -- all from RobotConfig.java
         }
     }
 

@@ -28,14 +28,7 @@ public class PinpointLocalizer implements Localizer {
 
     public PinpointLocalizer(HardwareMap hardwareMap) {
         pinpoint = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
-        pinpoint.setOffsets(0.0, 0.0, DistanceUnit.MM);
-        pinpoint.setEncoderResolution(GoBildaPinpointDriver.GoBildaOdometryPods.goBILDA_4_BAR_POD);
-        // Pedro expects +X forward, +Y left, CCW+ heading. Our strafe pod read backwards
-        // (moving LEFT made Y count DOWN), so the Y pod is REVERSED to put +Y on the left.
-        pinpoint.setEncoderDirections(
-                GoBildaPinpointDriver.EncoderDirection.FORWARD,    // X (forward) pod
-                GoBildaPinpointDriver.EncoderDirection.FORWARD);  // Y (strafe) pod
-        pinpoint.resetPosAndIMU();   // ROBOT MUST BE STATIONARY here
+        RobotConfig.configurePinpoint(pinpoint);   // pod offsets, pod type, directions + reset (HOLD STILL) -- all from RobotConfig.java
         // The Pinpoint keeps calibrating for ~0.25s after resetPosAndIMU(); a setPosition() issued
         // during that window (from setStartPose, moments later) is silently zeroed back to origin --
         // which made the robot think it started at (0,0,0). Block until calibration finishes. This

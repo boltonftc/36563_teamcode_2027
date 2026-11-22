@@ -4,6 +4,7 @@
   "files": [
     "AutoAim.java",
     "Drivebase.java",
+    "Extractor.java",
     "Feeder.java",
     "Flywheel.java",
     "Intake.java",
@@ -18,7 +19,6 @@
     "Turret.java",
     "parellelgurtautoV2.java",
     "shoot_park.java",
-    "shootauto1.java",
-    "Extractor.java"
+    "shootauto1.java"
   ]
 }

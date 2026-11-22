@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Turret implements Subsystem {
 
     private static final double DEGREES_PER_FULL_RANGE = 407.0;  // turret degrees across position 0..1
-    public  static final double MAX_ANGLE  = 90.0;  // farthest the turret may turn each way (check the wires!)
+    public  static final double MAX_ANGLE  = 120.0;  // farthest the turret may turn each way (check the wires!)
     private static final double CENTER     = 0.5;    // servo position that points the turret forward
     private static final double MIN_POS    = CENTER - MAX_ANGLE / DEGREES_PER_FULL_RANGE;
     private static final double MAX_POS    = CENTER + MAX_ANGLE / DEGREES_PER_FULL_RANGE;
