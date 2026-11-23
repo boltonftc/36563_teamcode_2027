@@ -56,7 +56,7 @@ public class shootauto3 extends LinearOpMode {
         // CAP:POSE seq=5 kind=pose
         Pose pose4 = new Pose(52.29, -50.90, Math.toRadians(4.5));
         // CAP:POSE seq=6 kind=pose
-        Pose pose5 = new Pose(59.64, -62.60, Math.toRadians(-0.0));
+        Pose pose5 = new Pose(66.64, -62.60, Math.toRadians(-0.0));
         // CAP:POSE seq=8 kind=pose
         Pose pose6 = new Pose(61.56, -62.43, Math.toRadians(-1.4));
         // CAP:POSE seq=10 kind=pose
@@ -151,18 +151,16 @@ public class shootauto3 extends LinearOpMode {
         Pose actualStart = follower.getPose();
         telemetry.addData("Actual pose at START", "(%.1f, %.1f, %.1f deg)", actualStart.getX(), actualStart.getY(), Math.toDegrees(actualStart.getHeading()));
         telemetry.update();
-        aim.aim(robot.localization, robot.turret);   // aim from the start pose before anything else
-        robot.update();
 
         robot.flywheel.toggle();                                  // flywheel ON (default target RPM)
-        for (int i = 0; i < 100 && opModeIsActive(); i++) {       // ~3 s: let it spin up
+        for (int i = 0; i < 80 && opModeIsActive(); i++) {       // ~3 s: let it spin up
             follower.update();                                    // hold our spot
             robot.update();                                       // make the flywheel actually spin
             sleep(20);
         }
         robot.intake.forward();
         robot.feeder.feed();                                     // same as holding X
-        for (int i = 0; i < 100 && opModeIsActive(); i++) {       // ~5 s: shoot
+        for (int i = 0; i < 50 && opModeIsActive(); i++) {       // ~5 s: shoot
             follower.update();
             robot.update();
             sleep(20);
