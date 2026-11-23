@@ -154,7 +154,9 @@ public class shootauto3V2 extends LinearOpMode {
         Pose actualStart = follower.getPose();
         telemetry.addData("Actual pose at START", "(%.1f, %.1f, %.1f deg)", actualStart.getX(), actualStart.getY(), Math.toDegrees(actualStart.getHeading()));
         telemetry.update();
-
+        aim.aim(robot.localization, robot.turret);   // aim from the start pose before anything else
+        robot.update();
+        // STUDENT-CODE-BEGIN   preload: spin up, then shoot before the first path
         robot.flywheel.toggle();                                  // flywheel ON (default target RPM)
         for (int i = 0; i < 70 && opModeIsActive(); i++) {       // ~3 s: let it spin up
             follower.update();                                    // hold our spot
@@ -171,7 +173,8 @@ public class shootauto3V2 extends LinearOpMode {
         //robot.flywheel.toggle();                                  // flywheel OFF
         robot.feeder.stop();                                     // indexer OFF
         robot.update(); 
-        
+        // STUDENT-CODE-END
+
         follower.followPath(chain1, SPEED, true);
         while (opModeIsActive() && follower.isBusy()) {
             follower.update();
@@ -243,11 +246,6 @@ public class shootauto3V2 extends LinearOpMode {
         aim.aim(robot.localization, robot.turret);   // final aim from where we stopped (the servo holds it)
         robot.update();
         // CAP:ACTION seq=14 button=X
-        // ── Captured action: Button X pressed here ──
-        // TODO: call your subsystem here, e.g. robot.intake.forward(); or robot.intake.reverse();
-        // To shoot here, see the lesson "Actions in Autonomous: Make It Shoot".
-        // CAP:ACTION-END seq=14                               // flywheel ON (default target RPM)
-       
         robot.intake.forward();
         robot.feeder.feed();                                     // same as holding X
         for (int i = 0; i < 100 && opModeIsActive(); i++) {       // ~5 s: shoot
@@ -256,7 +254,8 @@ public class shootauto3V2 extends LinearOpMode {
             sleep(20);
         }
         robot.feeder.stop();                                     // indexer OFF
-        robot.update(); 
+        robot.update();
+        // CAP:ACTION-END seq=14
 
         follower.followPath(chain5, SPEED, true);
         while (opModeIsActive() && follower.isBusy()) {
@@ -272,12 +271,9 @@ public class shootauto3V2 extends LinearOpMode {
         aim.aim(robot.localization, robot.turret);   // final aim from where we stopped (the servo holds it)
         robot.update();
         // CAP:ACTION seq=16 button=A
-        // ── Captured action: Button A pressed here ──
-        // TODO: call your subsystem here, e.g. robot.intake.forward(); or robot.intake.reverse();
-        // To shoot here, see the lesson "Actions in Autonomous: Make It Shoot".
-        // CAP:ACTION-END seq=16
         robot.extractor.deploy();
         robot.update();
+        // CAP:ACTION-END seq=16
 
         follower.followPath(chain6, SPEED, true);
         while (opModeIsActive() && follower.isBusy()) {
@@ -311,12 +307,9 @@ public class shootauto3V2 extends LinearOpMode {
         robot.update();
         aim.aim(robot.localization, robot.turret);   // final aim from where we stopped (the servo holds it)
         robot.update();
+        // CAP:ACTION seq=20 button=X
         robot.extractor.stow();
         robot.update();
-        // CAP:ACTION seq=20 button=X
-        // ── Captured action: Button X pressed here ──
-        // TODO: call your subsystem here, e.g. robot.intake.forward(); or robot.intake.reverse();
-        // To shoot here, see the lesson "Actions in Autonomous: Make It Shoot".
         // CAP:ACTION-END seq=20
 
         follower.followPath(chain8, SPEED, true);
